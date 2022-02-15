@@ -1,0 +1,41 @@
+# Supermarket
+
+postgres=# CREATE DATABASE supermarket;
+CREATE DATABASE
+postgres=# CREATE TABLE Product(id SERIAL PRIMARY KEY, name VARCHAR(100), cost INTEGER, expiration_date VARCHAR(40));
+CREATE TABLE
+postgres=# CREATE TABLE customer(id SERIAL PRIMARY KEY, name VARCHAR(50), last_name VARCHAR(50), money_for_product INTEGER);
+CREATE TABLE                                   ^
+postgres=# INSERT INTO Product VALUES(1,'apples_1kg', 45, '1.01.22-12.03.22');  
+INSERT 0 1
+postgres=# INSERT INTO Product VALUES(2,'milk', 60, '5.03.22-7.03.22');  
+INSERT 0 1
+postgres=# INSERT INTO Product VALUES(3,'fish', 120, '23.05.22-09.07.22');  
+INSERT 0 1
+postgres=# INSERT INTO customer VALUES(1,'kate', 'johns', 500);  
+INSERT 0 1
+postgres=# INSERT INTO customer VALUES(2,'suho', 'li', 50);  
+INSERT 0 1
+postgres=# CREATE OR REPLACE FUNCTION money() RETURNS TRIGGER AS $l$ BEGIN SELECT money_for_product FROM customer WHERE money_for_product>(SELECT cost FROM Product WHERE cost=60) + (SELECT cost FROM Product WHERE cost=120);
+postgres$# RETURN money_for_product;
+postgres$# END;
+postgres$# $l$ LANGUAGE plpgsql;
+CREATE FUNCTION
+postgres=# CREATE TRIGGER l AFTER INSERT ON customer FOR EACH ROW EXECUTE PROCEDURE money();
+CREATE TRIGGER
+postgres=# CREATE OR REPLACE FUNCTION foodname() RETURNS TRIGGER AS $a$ BEGIN SELECT name FROM customer WHERE (SELECT expiration_date FROM Product WHERE name='milk') = '5.03.22-7.03.22';
+RETURN name;
+END;                     
+$a$ LANGUAGE plpgsql;
+CREATE FUNCTION
+postgres=# CREATE TRIGGER a AFTER DELETE ON Product FOR EACH ROW EXECUTE PROCEDURE foodname();
+CREATE TRIGGER
+postgres=# CREATE OR REPLACE FUNCTION line_of_apples() RETURNS TRIGGER AS $b$ BEGIN SELECT name FROM customer WHERE (SELECT * FROM Product WHERE name='apples_1kg');
+RETURN name;
+END;
+$b$ LANGUAGE plpgsql;
+CREATE FUNCTION
+postgres=# CREATE TRIGGER b AFTER UPDATE ON customer FOR EACH ROW EXECUTE PROCEDURE line_of_apples();
+CREATE TRIGGER
+postgres=# CREATE VIEW market AS SELECT c.name FROM customer AS c LEFT JOIN (SELECT name FROM Product) AS p ON c.id=c.id;
+CREATE VIEW 
